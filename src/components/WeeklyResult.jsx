@@ -39,7 +39,7 @@ function statusTextColor(status) {
   }
 }
 
-function WeekdayCard({ day, isToday }) {
+function WeekdayCard({ day, isToday, isPast, onMarkFail }) {
   const { dateStr, dayOfWeek, status, checkedCount, totalCount } = day;
 
   return (
@@ -76,6 +76,19 @@ function WeekdayCard({ day, isToday }) {
           <span className="text-xs text-gray-400">목표 미설정</span>
         )}
       </div>
+
+      {/* 과거 날짜 실패 처리 버튼 */}
+      {isPast && (
+        <button
+          onClick={() => onMarkFail(dateStr)}
+          className={`w-3 h-3 rounded-full flex-shrink-0 transition-all
+            ${status === 'fail'
+              ? 'bg-red-400 hover:bg-red-300'
+              : 'bg-gray-200 hover:bg-red-200'
+            }`}
+          title={status === 'fail' ? '실패 취소' : '실패 처리'}
+        />
+      )}
     </div>
   );
 }
@@ -102,7 +115,7 @@ function WeekendCard({ day, gameStatus, isToday }) {
   );
 }
 
-export default function WeeklyResult({ getWeekStats, today }) {
+export default function WeeklyResult({ getWeekStats, today, onMarkFail }) {
   const [weekOffset, setWeekOffset] = useState(0);
 
   const stats = getWeekStats(weekOffset);
@@ -164,7 +177,13 @@ export default function WeeklyResult({ getWeekStats, today }) {
       {/* 평일 카드 목록 */}
       <div className="flex flex-col gap-2 mb-3">
         {weekdays.map((day) => (
-          <WeekdayCard key={day.dateStr} day={day} isToday={day.dateStr === today} />
+          <WeekdayCard
+            key={day.dateStr}
+            day={day}
+            isToday={day.dateStr === today}
+            isPast={day.dateStr < today}
+            onMarkFail={onMarkFail}
+          />
         ))}
       </div>
 

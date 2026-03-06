@@ -147,6 +147,26 @@ export function useStudyData() {
     save(updated);
   }, [today, save]);
 
+  // 과거 평일 날짜를 실패 처리 (이미 실패면 취소)
+  const markDayFail = useCallback((dateStr) => {
+    if (dateStr >= today) return;
+    const current = dataRef.current;
+    const entry = current[dateStr];
+    if (entry && entry.status === 'fail') {
+      const updated = { ...current };
+      delete updated[dateStr];
+      save(updated);
+    } else {
+      const updated = {
+        ...current,
+        [dateStr]: entry
+          ? { ...entry, status: 'fail' }
+          : { selectedGoals: [], checkedGoals: [], status: 'fail', completedAt: null },
+      };
+      save(updated);
+    }
+  }, [today, save]);
+
   // weekOffset: 0 = 이번 주, -1 = 지난 주, -2 = 2주 전 ...
   const getWeekStats = useCallback(
     (weekOffset = 0) => {
@@ -204,5 +224,6 @@ export function useStudyData() {
     toggleGoal,
     completeDay,
     resetToday,
+    markDayFail,
   };
 }

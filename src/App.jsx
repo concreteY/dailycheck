@@ -9,7 +9,7 @@ import { useStudyData } from './hooks/useStudyData';
 import { useGoalSettings } from './hooks/useGoalSettings';
 
 export default function App() {
-  const { todayEntry, today, deadlinePassed, getWeekStats, setGoals, toggleGoal, completeDay, resetToday } = useStudyData();
+  const { todayEntry, today, deadlinePassed, getWeekStats, setGoals, toggleGoal, completeDay, resetToday, markDayFail } = useStudyData();
   const { goals, saveGoals } = useGoalSettings();
   const [showSettings, setShowSettings] = useState(false);
 
@@ -43,7 +43,7 @@ export default function App() {
         {isWeekend ? (
           <>
             <WeekendBanner weekStats={currentWeekStats} />
-            <WeeklyResult getWeekStats={getWeekStats} today={today} />
+            <WeeklyResult getWeekStats={getWeekStats} today={today} onMarkFail={markDayFail} />
           </>
         ) : (
           <>
@@ -58,7 +58,7 @@ export default function App() {
                 onReset={resetToday}
               />
             )}
-            <WeeklyResult getWeekStats={getWeekStats} today={today} />
+            <WeeklyResult getWeekStats={getWeekStats} today={today} onMarkFail={markDayFail} />
           </>
         )}
       </div>
