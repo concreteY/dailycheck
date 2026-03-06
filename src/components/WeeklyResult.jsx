@@ -81,13 +81,13 @@ function WeekdayCard({ day, isToday, isPast, onMarkFail }) {
       {isPast && (
         <button
           onClick={() => onMarkFail(dateStr)}
-          className={`w-3 h-3 rounded-full flex-shrink-0 transition-all
+          className={`flex-shrink-0 leading-none transition-all
             ${status === 'fail'
-              ? 'bg-red-400 hover:bg-red-300'
-              : 'bg-gray-200 hover:bg-red-200'
+              ? 'text-red-400 hover:text-red-300'
+              : 'text-gray-300 hover:text-red-300'
             }`}
           title={status === 'fail' ? '실패 취소' : '실패 처리'}
-        />
+        >.</button>
       )}
     </div>
   );
