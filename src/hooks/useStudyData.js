@@ -52,13 +52,21 @@ export function useStudyData() {
   const dataRef = useRef(data);
   dataRef.current = data;
 
-  const applyAutoFail = useCallback((currentData, todayStr, isPastDeadline) => {
+  const applyAutoResult = useCallback((currentData, todayStr, isPastDeadline) => {
     if (!isPastDeadline) return currentData;
     const entry = currentData[todayStr];
     if (entry && entry.status === 'in_progress') {
+      const allDone =
+        entry.selectedGoals.length > 0 &&
+        entry.checkedGoals.length === entry.selectedGoals.length;
+      const newStatus = allDone ? 'success' : 'fail';
       const updated = {
         ...currentData,
-        [todayStr]: { ...entry, status: 'fail' },
+        [todayStr]: {
+          ...entry,
+          status: newStatus,
+          ...(allDone ? { completedAt: new Date().toISOString() } : {}),
+        },
       };
       saveToStorage(updated);
       return updated;
@@ -77,14 +85,14 @@ export function useStudyData() {
       setDeadlinePassed(isPast);
 
       const latestData = dataRef.current;
-      const updated = applyAutoFail(latestData, newToday, isPast);
+      const updated = applyAutoResult(latestData, newToday, isPast);
       if (updated !== latestData) setData(updated);
     };
 
     tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
-  }, [applyAutoFail]);
+  }, [applyAutoResult]);
 
   const save = useCallback((newData) => {
     setData(newData);
