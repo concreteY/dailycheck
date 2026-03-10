@@ -53,21 +53,46 @@ export function useStudyData() {
   dataRef.current = data;
 
   const applyAutoResult = useCallback((currentData, todayStr, isPastDeadline) => {
-    if (!isPastDeadline) return currentData;
-    const entry = currentData[todayStr];
-    if (entry && entry.status === 'in_progress') {
-      const allDone =
-        entry.selectedGoals.length > 0 &&
-        entry.checkedGoals.length === entry.selectedGoals.length;
-      const newStatus = allDone ? 'success' : 'fail';
-      const updated = {
-        ...currentData,
-        [todayStr]: {
-          ...entry,
-          status: newStatus,
-          ...(allDone ? { completedAt: new Date().toISOString() } : {}),
-        },
-      };
+    let updated = currentData;
+
+    // 과거 날짜 중 in_progress 상태 일괄 처리
+    for (const dateStr of Object.keys(currentData)) {
+      if (dateStr >= todayStr) continue;
+      const entry = updated[dateStr];
+      if (entry && entry.status === 'in_progress') {
+        const allDone =
+          entry.selectedGoals.length > 0 &&
+          entry.checkedGoals.length === entry.selectedGoals.length;
+        updated = {
+          ...updated,
+          [dateStr]: {
+            ...entry,
+            status: allDone ? 'success' : 'fail',
+            ...(allDone ? { completedAt: entry.completedAt ?? new Date().toISOString() } : {}),
+          },
+        };
+      }
+    }
+
+    // 오늘 날짜: 9PM 이후면 처리
+    if (isPastDeadline) {
+      const entry = updated[todayStr];
+      if (entry && entry.status === 'in_progress') {
+        const allDone =
+          entry.selectedGoals.length > 0 &&
+          entry.checkedGoals.length === entry.selectedGoals.length;
+        updated = {
+          ...updated,
+          [todayStr]: {
+            ...entry,
+            status: allDone ? 'success' : 'fail',
+            ...(allDone ? { completedAt: new Date().toISOString() } : {}),
+          },
+        };
+      }
+    }
+
+    if (updated !== currentData) {
       saveToStorage(updated);
       return updated;
     }
